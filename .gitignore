@@ -1,5 +1,5 @@
 node_modules
-bim
+bin
 build
 .secret
 .gas-price-testnet.json
