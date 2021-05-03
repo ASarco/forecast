@@ -1,0 +1,6 @@
+node_modules
+bim
+build
+.secret
+.gas-price-testnet.json
+.accounts
