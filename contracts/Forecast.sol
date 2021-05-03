@@ -8,10 +8,10 @@ pragma solidity >=0.7.0 <0.9.0;
  */
 contract Forecast {
     
-    address contractOwner;
+    address immutable contractOwner;
  
     // the bets
-    mapping(address => uint) public bets;
+    mapping(address => uint) bets;
     
     // number of bets
     uint8 public betCount = 0;
@@ -49,13 +49,27 @@ contract Forecast {
         //uint winnerPrice,
         uint currentPrice
     );
+
+    modifier onlyBy(address _account) {
+        require (msg.sender == _account, "Unauthorised, only owner can call");
+        _;
+    }
+
+    modifier costs(uint _amount) {
+        require (msg.value >= _amount, "Not enough funds to bet");
+
+        _;
+        if (msg.value > _amount)
+            payable(msg.sender).transfer(msg.value - _amount);
+    }
+
+    modifier notFinished(bool _ended) {
+        require (!_ended, "The sweepstake has finished.");
+        _;
+    }
     
     
-    function bet(uint price) public payable {
-        
-        //require (ended, "The sweepstake has finished.");
-            
-        require (betValue > msg.value, "Not enough funds to bet");
+    function bet(uint price) public payable costs(betValue) notFinished(ended) {
         
         accPot =  accPot + msg.value;
         bets[msg.sender] = price;
@@ -63,28 +77,23 @@ contract Forecast {
         emit PotIncreased(accPot);
     } 
     
-    function sweepstakeEnd(uint currentPrice) public {
-        if (ended) 
-            revert SweepstakeAlreadyEnded();
+    function sweepstakeEnd(uint currentPrice) public onlyBy(contractOwner) notFinished(ended) {
         ended = true;
         
-        address payable winner = calculateWinner(currentPrice);
-
         uint toTransfer = accPot;
         accPot = 0;
-        winner.transfer(toTransfer);
+        
         emit Finished(currentPrice);
     }
-    
-    
-    function calculateWinner(uint currentPrice) pure private returns (address payable) {
-        address payable winner;
-        uint winnerPrice = currentPrice;
-        winnerPrice += 1; //nonsense
-        //uint minimumDiff = type(uint).max;
-        return winner;
+
+    function allBets() public onlyBy(contractOwner)  {
+        //how do I return the bets? 
     }
     
-        
-        
+    function payWinner(address winner) private onlyBy(contractOwner) returns (uint payedAmount) {
+
+        //TODO: Calculate fees here
+        payable(winner).transfer(accPot);
+        return accPot;
+    }      
 }
