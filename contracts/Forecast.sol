@@ -1,17 +1,20 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity >=0.7.0 <0.9.0;
+pragma solidity >=0.7.0 <0.8.0;
 
-/** 
- * @title Forecast
- * @dev Forecast a price in a future date
- */
-contract Forecast {
+//import "../contractsV5/BridgePublicAPI.sol";
+
+contract Forecast {//is BridgePublicAPI {
     
     address immutable contractOwner;
- 
+
+    struct Punter {
+        address punterAddress;
+        string price;
+    }
+
     // the bets
-    mapping(address => uint) bets;
+    Punter[] public bets; 
     
     // number of bets
     uint8 public betCount = 0;
@@ -28,17 +31,13 @@ contract Forecast {
     
     // Amount accumulated
     uint public accPot = 0;
-    
-    /// The sweepstake has finished.
-    error SweepstakeAlreadyEnded();
-    /// Not enough funds to bet
-    error NotEnoughFunds();
 
 
-    constructor (uint _finishingTime, uint32 _betValue) {
+    constructor (uint _finishingTime, uint _betValue) {
         sweepstakeEndTime = _finishingTime;
         betValue = _betValue;
         contractOwner = msg.sender;
+        //sendQuery(120); //for now
     }
     
     event PotIncreased(
@@ -47,7 +46,7 @@ contract Forecast {
     
     event Finished(
         //uint winnerPrice,
-        uint currentPrice
+        address bets
     );
 
     modifier onlyBy(address _account) {
@@ -67,23 +66,30 @@ contract Forecast {
         require (!_ended, "The sweepstake has finished.");
         _;
     }
+
+
+    function sendQuery(uint _endTime) public {
+        //bridge_query(_endTime, "URL", "json(https://testnet.binance.vision/api/v3/ticker/price?symbol=BTCUSDT).price)" );
+    }
+
+    //function __callback(bytes32 _myid, string memory _result) public {
+    //    sweepstakeEnd(_result);
+    //}    
     
-    
-    function bet(uint price) public payable costs(betValue) notFinished(ended) {
+    function bet(string memory _price) public payable costs(betValue) notFinished(ended) {
         
-        accPot =  accPot + msg.value;
-        bets[msg.sender] = price;
+        accPot +=  betValue; //bet should always be betValue, even if sender sent more
+        Punter memory newPunter;
+        newPunter.price = _price;
+        newPunter.punterAddress = msg.sender;
+        bets.push(newPunter);
         betCount++;
         emit PotIncreased(accPot);
     } 
     
-    function sweepstakeEnd(uint currentPrice) public onlyBy(contractOwner) notFinished(ended) {
-        ended = true;
-        
-        uint toTransfer = accPot;
-        accPot = 0;
-        
-        emit Finished(currentPrice);
+    function sweepstakeEnd(string memory finalPrice) public onlyBy(contractOwner) notFinished(ended) {
+        //ended = true;
+        //uint toTransfer = accPot;
     }
 
     function allBets() public onlyBy(contractOwner)  {
@@ -94,6 +100,7 @@ contract Forecast {
 
         //TODO: Calculate fees here
         payable(winner).transfer(accPot);
+        emit Finished(winner);
         return accPot;
     }      
 }

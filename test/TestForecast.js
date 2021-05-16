@@ -23,15 +23,15 @@ contract("Forecast", accounts => {
 	describe('betting', async () => {
 		it("should place a bet for 42 wei", async () => {
 
-			await forecast.bet(42, { from: accounts[0], value: 42 });
+			await forecast.bet(142, { from: accounts[0], value: 42} );
 			assert.equal(await forecast.betCount(), '1', "Bet count should be 1");
-			assert.equal(await forecast.accPot(), '42', "Accumulated pot should be 42");
+			assert.equal(await forecast.accPot(), 42, "Accumulated pot should be 42");
 		})
-		it("should place another bet and get the total", async () => {
+		it("should place another bet with more money, but only should increase by 42", async () => {
 
-			await forecast.bet(42, { from: accounts[1], value: 42 });
-			assert.equal(await forecast.betCount(), '2', "Bet count should be 2");
-			assert.equal(await forecast.accPot(), '84', "Accumulated pot should be 84");
+			await forecast.bet(284, { from: accounts[1], value: 52 });
+			assert.equal(await forecast.betCount(), 2, "Bet count should be 2");
+			assert.equal(await forecast.accPot(), 84, "Accumulated pot should be 84");
 		})
 	});
 });

@@ -1,55 +1,79 @@
 <!DOCTYPE html>
-<html >
-  <head>
-    <title>Register information at Blockchain</title>
+<html>
 
-    <link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' rel='stylesheet' type='text/css'>
-    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js"></script>
-    <script src="./node_modules/web3/dist/web3.min.js"></script>
-    <script src="./index.js"></script>
-  </head>
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>on BSC</title>
 
-  <body class="container">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+  <script src="./node_modules/web3/dist/web3.min.js"></script>
+  <script src="./index.js"></script>
+</head>
 
-    <h1 class="page-header">Register information at Blockchain - RSK network</h1>
+<body class="container">
 
-    <div class="row">
+  <h1 class="page-header">Bet for price forecast - BSC network</h1>
+
+  <div class="row">
+    <h3 class="sub-header">Pronostica el precio de ADA</h3>
+    <form class="row mb-3" role="form">
+      <label for="newInfo" id="endTime"></label>
+      <div class="input-group col">
+        <span class="input-group-text">en USD</span>
+        <input id="newInfo" class="form-control" type="number">
+
+      </div>
+      <div class="col">
+        <a href="#" onclick="bet()" class="btn btn-primary">Apostar</a>
+      </div>
+    </form>
+  </div>
+
+  <div class="row mb-3">
+    <h3 class="sub-header">Total bets</h3>
+    <div class="form-group">
       <div>
-        <h3 class="sub-header">Set information</h3>
-        <form class="form-inline" role="form">
-          <div class="form-group">
-            <table>
-              <tr>
-                <td><label for="newInfo">Info:</label> </td>
-                <td>
-                  <input class="form-control" id="newInfo">
-                </td>
-              </tr>
-            </table>
-          </div>
-          <a href="#" onclick="registerSetInfo()" class="btn btn-primary">Set</a>
-        </form>
+        Valor de cada apuesta:
+        <span id="betValue" style="display: none"></span><span id="betValueBNB"></span> BNB, aproximadamente <span
+          id="betValueUSD"></span> USD
+      </div>
+      <div>
+        Pozo acumulado:
+        <span id="accPot" style="display: none;"></span><span id="accPotBNB"></span> BNB, aproximadamente <span
+          id="accPotUSD"></span> USD
+      </div>
+      <div>
+        Cantidad de apuestas:
+        <span id="totalBets"></span>
       </div>
     </div>
+  </div>
+  </div>
 
-    <div class="row">
-      <div>
-        <h3 class="sub-header">Get last information saved</h3>
-        <form class="form-inline" role="form">
-          <a href="#" onclick="registerGetInfo()" class="btn btn-primary">Get</a>
-          <div class="form-group">
-            <table>
-              <tr>
-                <td>Info:</td>
-                <td>
-                  <label id="lastInfo">
-                </td>
-              </tr>
-            </table>
-          </div>
-        </form>
-      </div>
+  <div class="row mb-3">
+    <h3 class="sub-header">Finalizar</h3>
+    <label for="finalPrice">Precio final</label>
+    <div class="input-group col">
+      <span class="input-group-text">en USD</span>
+      <input id="finalPrice" class="form-control" type="number">
     </div>
+    <div class="col">
+      <a href="#" onclick="end()" class="btn btn-primary">Finalizar</a>
+    </div>
+  </div>
 
-  </body>
+  <div class="row mb-3">
+    <div class="col">
+      <h3>Ganador(es)</h3>
+    </div>
+    <div id="winnerList"/>
+  </div>
+  </div>
+
+</body>
+
 </html>

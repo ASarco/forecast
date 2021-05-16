@@ -1,6 +1,7 @@
 node_modules
 bin
 build
-.secret
+.secret*
 .gas-price-testnet.json
 .accounts
+.vscode

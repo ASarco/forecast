@@ -22,16 +22,16 @@ const HDWalletProvider = require('@truffle/hdwallet-provider');
 // const infuraKey = "fj4jll3k.....";
 //
 const fs = require('fs');
-const mnemonic = fs.readFileSync(".secret").toString().trim();
+const mnemonic = fs.readFileSync("../.secret").toString().trim();
 if (!mnemonic || mnemonic.split(' ').length !== 12) {
   throw new Error('unable to retrieve mnemonic from .secret');
 }
-const mnemonicmm = fs.readFileSync(".secret_mm").toString().trim();
+const mnemonicmm = fs.readFileSync("../.secret_mm").toString().trim();
 if (!mnemonicmm || mnemonicmm.split(' ').length !== 12) {
   throw new Error('unable to retrieve mnemonic from .secret_mm');
 }
 
-const gasPriceTestnetRaw = fs.readFileSync(".gas-price-testnet.json").toString().trim();
+const gasPriceTestnetRaw = fs.readFileSync("../.gas-price-testnet.json").toString().trim();
 const gasPriceTestnet = parseInt(JSON.parse(gasPriceTestnetRaw).result, 16);
 if (typeof gasPriceTestnet !== 'number' || isNaN(gasPriceTestnet)) {
   throw new Error('unable to retrieve network gas price from .gas-price-testnet.json');
@@ -121,7 +121,7 @@ module.exports = {
   // Configure your compilers
   compilers: {
     solc: {
-      version: "0.7.6",    // Fetch exact version from solc-bin (default: truffle's version)
+      version: "0.5.9",    // Fetch exact version from solc-bin (default: truffle's version)
       // docker: true,        // Use "0.5.1" you've installed locally with docker (default: false)
       // settings: {          // See the solidity docs for advice about optimization and evmVersion
       //  optimizer: {
