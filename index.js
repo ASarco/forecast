@@ -1,5 +1,4 @@
 // Source code to interact with smart contract
-
 // Accounts
 var account;
 // Contract
