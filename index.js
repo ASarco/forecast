@@ -2,19 +2,13 @@
 
 // Accounts
 var account;
+// Contract
+var contract;
 // web3 provider with fallback for old version
 window.addEventListener('load', async () => {
     // New web3 provider
     if (window.ethereum) {
         window.web3 = new Web3(ethereum);
-        try {
-            // ask user for permission
-            await ethereum.enable();
-            // user approved permission
-        } catch (error) {
-            // user rejected permission
-            console.log('user rejected permission');
-        }
     }
     // Old web3 provider
     else if (window.web3) {
@@ -24,6 +18,7 @@ window.addEventListener('load', async () => {
     }
     // No web3 provider
     else {
+        $("#alertWallet").removeClass("d-none")
         console.log('No web3 provider detected');
     }
 
@@ -34,14 +29,55 @@ window.addEventListener('load', async () => {
     var contractAddress = '0x76dDeD3007186650e39C072A7DC90D49F0634805';     //BSC
     var abi = JSON.parse('[    {      "inputs": [        {          "internalType": "uint256",          "name": "_finishingTime",          "type": "uint256"        },        {          "internalType": "uint256",          "name": "_betValue",          "type": "uint256"        }      ],      "stateMutability": "nonpayable",      "type": "constructor"    },    {      "anonymous": false,      "inputs": [        {          "indexed": false,          "internalType": "address",          "name": "bets",          "type": "address"        }      ],      "name": "Finished",      "type": "event"    },    {      "anonymous": false,      "inputs": [        {          "indexed": false,          "internalType": "uint256",          "name": "accPot",          "type": "uint256"        }      ],      "name": "PotIncreased",      "type": "event"    },    {      "inputs": [],      "name": "accPot",      "outputs": [        {          "internalType": "uint256",          "name": "",          "type": "uint256"        }      ],      "stateMutability": "view",      "type": "function",      "constant": true    },    {      "inputs": [],      "name": "betCount",      "outputs": [        {          "internalType": "uint8",          "name": "",          "type": "uint8"        }      ],      "stateMutability": "view",      "type": "function",      "constant": true    },    {      "inputs": [],      "name": "betValue",      "outputs": [        {          "internalType": "uint256",          "name": "",          "type": "uint256"        }      ],      "stateMutability": "view",      "type": "function",      "constant": true    },    {      "inputs": [        {          "internalType": "uint256",          "name": "",          "type": "uint256"        }      ],      "name": "bets",      "outputs": [        {          "internalType": "address",          "name": "punterAddress",          "type": "address"        },        {          "internalType": "string",          "name": "price",          "type": "string"        }      ],      "stateMutability": "view",      "type": "function",      "constant": true    },    {      "inputs": [],      "name": "sweepstakeEndTime",      "outputs": [        {          "internalType": "uint256",          "name": "",          "type": "uint256"        }      ],      "stateMutability": "view",      "type": "function",      "constant": true    },    {      "inputs": [        {          "internalType": "uint256",          "name": "_endTime",          "type": "uint256"        }      ],      "name": "sendQuery",      "outputs": [],      "stateMutability": "nonpayable",      "type": "function"    },    {      "inputs": [        {          "internalType": "string",          "name": "_price",          "type": "string"        }      ],      "name": "bet",      "outputs": [],      "stateMutability": "payable",      "type": "function",      "payable": true    },    {      "inputs": [        {          "internalType": "string",          "name": "finalPrice",          "type": "string"        }      ],      "name": "sweepstakeEnd",      "outputs": [],      "stateMutability": "nonpayable",      "type": "function"    },    {      "inputs": [],      "name": "allBets",      "outputs": [],      "stateMutability": "nonpayable",      "type": "function"    }  ]');
 
-    //contract instance
-    contract = new web3.eth.Contract(abi, contractAddress);
 
+    /*     var endEvent = contract.Finished();
+        endEvent.watch(
+            function(error, result) {
+                if (!error) {
+                    console.log("Winner price: ", result);
+                    document.getElementById('lastPrice').innerHTML = result;
+                }
+            }
+        ) */
+    $("#walletButton").click(async () => {
+        try {
+            // ask user for permission
+            await ethereum.request({ method: 'eth_requestAccounts' });
+            // user approved permission
+            //contract instance
+            contract = new web3.eth.Contract(abi, contractAddress);
+            initContract();
+            wallectConnected()
+            //setInterval(checkActive, 5000)
+        } catch (error) {
+            // user rejected permission
+            console.log('user rejected permission');
+        }
+    })
+
+});
+
+function wallectConnected(connected) {
+    if (connected) {
+        $("#walletButton").text("Conectado a la billetera").removeClass("btn-primary").addClass("btn-success");
+    } else {
+        $("#walletButton").text("Conectar a la billetera").removeClass("btn-success").addClass("btn-primary");
+    }
+}
+
+function checkActive() {
+    if (!web3.currentProvider) {
+        $("#walletButton").text("Conectar a la billetera").removeClass("btn-success").addClass("btn-primary");
+    }
+  }
+
+function initContract() {
     web3.eth.getAccounts(function (err, accounts) {
         if (err != null) {
             alert("Error retrieving accounts.");
             return;
         }
+        wallectConnected(accounts.length > 0)
         if (accounts.length == 0) {
             alert("No account found! Make sure the Ethereum client is configured properly.");
             return;
@@ -51,34 +87,23 @@ window.addEventListener('load', async () => {
         web3.eth.defaultAccount = account;
     });
 
-/*     var endEvent = contract.Finished();
-    endEvent.watch(
-        function(error, result) {
-            if (!error) {
-                console.log("Winner price: ", result);
-                document.getElementById('lastPrice').innerHTML = result;
-            }
-        }
-    ) */
-
     contract.events.PotIncreased({
-            filter: {}, // Using an array means OR: e.g. 20 or 23
-            fromBlock: "earliest"
-        })
-        .on("connected", function(subscriptionId) {
-            console.log(`SubscriptionId ${subscriptionId}`);
-        })
-        .on("data", function(event) {
-            printAcc(event.returnValues.accPot);
-            getBetCount();
-        })
-        .on("error", function(error) {
-            console.log(`Error: ${error}`);
-        });
+        filter: {}, // Using an array means OR: e.g. 20 or 23
+        fromBlock: "earliest"})
+    .on("connected", function (subscriptionId) {
+        console.log(`SubscriptionId ${subscriptionId}`);
+    })
+    .on("data", function (event) {
+        printAcc(event.returnValues.accPot);
+        getBetCount();
+    })
+    .on("error", function (error) {
+        console.log(`Error: ${error}`);
+    });
     
-
     initData();
-});
+}
+
 
 function initData() {
     getAccPot();
@@ -97,7 +122,7 @@ function bet() {
     info = $("#newInfo").val();
     let betValue = $("#betValue").text();
     console.log(`Placing bet ${betValue} ${info}`);
-    contract.methods.bet(info).send({ from: account, value: betValue}).then(function (tx) {
+    contract.methods.bet(info).send({ from: account, value: betValue }).then(function (tx) {
         console.log(`Transaction: ${tx}`);
     });
     $("#newInfo").val('');
@@ -118,7 +143,7 @@ function getBetCount() {
 }
 
 function getSweepstakeEndTime() {
-    contract.methods.sweepstakeEndTime().call().then(function(info) {
+    contract.methods.sweepstakeEndTime().call().then(function (info) {
         console.log(`end: ${info}`);
         var date = new Date(info * 1000);
         $('#endTime').text(date.toString());
@@ -129,13 +154,13 @@ function getSweepstakeEndTime() {
 function getBetValue() {
     contract.methods.betValue().call().then(function (wei) {
         $('#betValue').text(wei);
-        $('#betValueBNB').text( web3.utils.fromWei(wei) );
+        $('#betValueBNB').text(web3.utils.fromWei(wei));
         getPriceAPI();
     });
 }
 
 function getPriceAPI() {
-    $.get("https://testnet.binance.vision/api/v3/ticker/price?symbol=BNBUSDT", function(data) {
+    $.get("https://testnet.binance.vision/api/v3/ticker/price?symbol=BNBUSDT", function (data) {
         $('#accPotUSD').text(Math.round(data.price * $('#accPotBNB').text() * 100) / 100);
         $('#betValueUSD').text(Math.round(data.price * $('#betValueBNB').text() * 100) / 100);
         console.log(`Price ${data}`, data);
@@ -149,14 +174,14 @@ function end() {
     var promises = [];
     for (let i = 0; i < $('#totalBets').text(); i++) {
         promises.push(
-            contract.methods.bets(i).call({from: account}).then(function (betResult) {
+            contract.methods.bets(i).call({ from: account }).then(function (betResult) {
                 console.log(`Bet ${i}: ${betResult.punterAddress} ${betResult.price}`);
-                allBets[i] = {addr: betResult.punterAddress, price:betResult.price};
+                allBets[i] = { addr: betResult.punterAddress, price: betResult.price };
             })
         );
     }
-    Promise.all(promises).then(function() {
-        var winners = findWinners(finalPrice, allBets); 
+    Promise.all(promises).then(function () {
+        var winners = findWinners(finalPrice, allBets);
         var html = ""
         winners.forEach(winner => {
             html += `<div class="row"><span> ${winner.addr} con precio ${winner.price}</span></div>`
@@ -174,14 +199,14 @@ function findWinners(finalPrice, allBets) {
         if (close < diff) {
             diff = close;
             winners = [];
-            winners.push({addr: allBets[key].addr, price: allBets[key].price});
+            winners.push({ addr: allBets[key].addr, price: allBets[key].price });
         } else if (close == diff) {
             diff = close;
-            winners.push({addr: allBets[key].addr, price: allBets[key].price});
-        }      
+            winners.push({ addr: allBets[key].addr, price: allBets[key].price });
+        }
     }
     //console.log(`And the winner is... ${winners[0].addr} ${winners[0].price}`);
     return winners;
 }
 
-module.exports = findWinners;
+//module.exports = findWinners;
