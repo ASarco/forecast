@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@metamask/detect-provider": "^1.2.0",
     "@openzeppelin/contracts": "4.1.0",
     "@rsksmart/rsk3": "^0.3.4",
     "@truffle/hdwallet-provider": "^1.2.3",

@@ -41,12 +41,10 @@ window.addEventListener('load', async () => {
     $("#walletButton").click(async () => {
         try {
             // ask user for permission
-            await ethereum.request({ method: 'eth_requestAccounts' });
+            var connected = await ethereum.request({ method: 'eth_requestAccounts' });
             // user approved permission
             //contract instance
-            contract = new web3.eth.Contract(abi, contractAddress);
-            initContract();
-            wallectConnected()
+            wallectConnected(connected)
             //setInterval(checkActive, 5000)
         } catch (error) {
             // user rejected permission
@@ -54,9 +52,13 @@ window.addEventListener('load', async () => {
         }
     })
 
+    initContract(abi, contractAddress);
+
 });
 
 function wallectConnected(connected) {
+    console.log(`Connected: ${connected}`);
+    $("#betButton").prop("disabled", !connected);
     if (connected) {
         $("#walletButton").text("Conectado a la billetera").removeClass("btn-primary").addClass("btn-success");
     } else {
@@ -64,13 +66,8 @@ function wallectConnected(connected) {
     }
 }
 
-function checkActive() {
-    if (!web3.currentProvider) {
-        $("#walletButton").text("Conectar a la billetera").removeClass("btn-success").addClass("btn-primary");
-    }
-  }
-
-function initContract() {
+function initContract(abi, contractAddress) {
+    contract = new web3.eth.Contract(abi, contractAddress);
     web3.eth.getAccounts(function (err, accounts) {
         if (err != null) {
             alert("Error retrieving accounts.");
@@ -166,46 +163,6 @@ function getPriceAPI() {
     });
 }
 
-function end() {
-    let finalPrice = $("#finalPrice").val();
-    getBetCount();
-    let allBets = {};
-    var promises = [];
-    for (let i = 0; i < $('#totalBets').text(); i++) {
-        promises.push(
-            contract.methods.bets(i).call({ from: account }).then(function (betResult) {
-                console.log(`Bet ${i}: ${betResult.punterAddress} ${betResult.price}`);
-                allBets[i] = { addr: betResult.punterAddress, price: betResult.price };
-            })
-        );
-    }
-    Promise.all(promises).then(function () {
-        var winners = findWinners(finalPrice, allBets);
-        var html = ""
-        winners.forEach(winner => {
-            html += `<div class="row"><span> ${winner.addr} con precio ${winner.price}</span></div>`
-        });
-        $("#winnerList").html(html);
 
-    })
-}
-
-function findWinners(finalPrice, allBets) {
-    let diff = Number.MAX_SAFE_INTEGER;
-    let winners = [];
-    for (const key in allBets) {
-        let close = Math.abs(allBets[key].price - finalPrice);
-        if (close < diff) {
-            diff = close;
-            winners = [];
-            winners.push({ addr: allBets[key].addr, price: allBets[key].price });
-        } else if (close == diff) {
-            diff = close;
-            winners.push({ addr: allBets[key].addr, price: allBets[key].price });
-        }
-    }
-    //console.log(`And the winner is... ${winners[0].addr} ${winners[0].price}`);
-    return winners;
-}
 
 //module.exports = findWinners;

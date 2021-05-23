@@ -7,6 +7,7 @@ pragma solidity >=0.7.0 <0.8.0;
 contract Forecast {//is BridgePublicAPI {
     
     address immutable contractOwner;
+    address constant relayAddress = address(0x14860a73b98990CCBD8D61279E02C315EC0D4Da3);
 
     struct Punter {
         address punterAddress;
@@ -49,8 +50,8 @@ contract Forecast {//is BridgePublicAPI {
         address bets
     );
 
-    modifier onlyBy(address _account) {
-        require (msg.sender == _account, "Unauthorised, only owner can call");
+    modifier onlyBy(address _accountOwner, address _relayAddress) {
+        require (msg.sender == _accountOwner || msg.sender == _relayAddress , "Unauthorised, only owner can call");
         _;
     }
 
