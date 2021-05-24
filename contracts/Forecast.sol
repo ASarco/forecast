@@ -46,8 +46,8 @@ contract Forecast {//is BridgePublicAPI {
     );
     
     event Finished(
-        //uint winnerPrice,
-        address bets
+        uint finalPrice,
+        uint8 betCount
     );
 
     modifier onlyBy(address _accountOwner, address _relayAddress) {
@@ -68,11 +68,6 @@ contract Forecast {//is BridgePublicAPI {
         _;
     }
 
-
-    function sendQuery(uint _endTime) public {
-        //bridge_query(_endTime, "URL", "json(https://testnet.binance.vision/api/v3/ticker/price?symbol=BTCUSDT).price)" );
-    }
-
     //function __callback(bytes32 _myid, string memory _result) public {
     //    sweepstakeEnd(_result);
     //}    
@@ -88,20 +83,26 @@ contract Forecast {//is BridgePublicAPI {
         emit PotIncreased(accPot);
     } 
     
-    function sweepstakeEnd(string memory finalPrice) public onlyBy(contractOwner) notFinished(ended) {
-        //ended = true;
+    function sweepstakeEnd(uint _finalPrice) public onlyBy(contractOwner, relayAddress) notFinished(ended) {
+        ended = true;
+        emit Finished(_finalPrice, betCount);
         //uint toTransfer = accPot;
     }
 
-    function allBets() public onlyBy(contractOwner)  {
-        //how do I return the bets? 
+    function sweepstakeRestart() public onlyBy(contractOwner, relayAddress)  {
+        ended = false;
+        //uint toTransfer = accPot;
     }
     
-    function payWinner(address winner) private onlyBy(contractOwner) returns (uint payedAmount) {
+    function payWinner(address[] calldata winners) private onlyBy(contractOwner, relayAddress) returns (uint payedAmount) {
 
-        //TODO: Calculate fees here
-        payable(winner).transfer(accPot);
-        emit Finished(winner);
+        uint sharedPot = (accPot * 95) / 100;
+        uint eachPrize = sharedPot / winners.length;
+        uint fees = accPot - sharedPot;
+        for (uint8 i = 0; i < winners.length; i++) {
+            payable(winners[i]).transfer(eachPrize);
+        }
+        payable(contractOwner).transfer(fees);
         return accPot;
     }      
 }
