@@ -11,7 +11,7 @@
     integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
   <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
   <script src="./web3.min.js"></script>
-  <script src="./index.js"></script>
+  <script type="module" src="./index.js"></script>
 </head>
 
 <body class="container">
@@ -37,7 +37,7 @@
 
         </div>
         <div class="col">
-          <a id="betButton" href="#" onclick="bet()" class="btn btn-primary">Apostar</a>
+          <a id="betButton" href="#" class="btn btn-primary">Apostar</a>
         </div>
       </form>
     </div>
@@ -62,18 +62,18 @@
       </div>
     </div>
 
-<!-- <div class="row mb-3">
+    <div class="row mb-3">
       <h3 class="sub-header">Finalizar</h3>
       <label for="finalPrice">Precio final</label>
       <div class="input-group col">
+        <span id="finalPrice"></span>
         <span class="input-group-text">en USD</span>
-        <input id="finalPrice" class="form-control" type="number">
       </div>
       <div class="col">
-        <a href="#" onclick="end()" class="btn btn-primary">Finalizar</a>
+        <a id="resetButton" href="#" class="btn btn-primary">Reset</a>
       </div>
     </div>
-  -->
+
 
     <div class="row mb-3">
       <div class="col">

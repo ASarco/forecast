@@ -5,3 +5,4 @@ build
 .gas-price-testnet.json
 .accounts
 .vscode
+.env

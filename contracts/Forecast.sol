@@ -6,8 +6,8 @@ pragma solidity >=0.7.0 <0.8.0;
 
 contract Forecast {//is BridgePublicAPI {
     
-    address immutable contractOwner;
-    address constant relayAddress = address(0x14860a73b98990CCBD8D61279E02C315EC0D4Da3);
+    address immutable public contractOwner;
+    address constant public relayAddress = address(0x14860a73b98990CCBD8D61279E02C315EC0D4Da3);
 
     struct Punter {
         address punterAddress;
@@ -46,7 +46,7 @@ contract Forecast {//is BridgePublicAPI {
     );
     
     event Finished(
-        uint finalPrice,
+        string finalPrice,
         uint8 betCount
     );
 
@@ -83,18 +83,21 @@ contract Forecast {//is BridgePublicAPI {
         emit PotIncreased(accPot);
     } 
     
-    function sweepstakeEnd(uint _finalPrice) public onlyBy(contractOwner, relayAddress) notFinished(ended) {
+    function sweepstakeEnd(string calldata _finalPrice) public onlyBy(contractOwner, relayAddress) notFinished(ended) {
         ended = true;
         emit Finished(_finalPrice, betCount);
         //uint toTransfer = accPot;
     }
 
-    function sweepstakeRestart() public onlyBy(contractOwner, relayAddress)  {
+    function sweepstakeReset() public onlyBy(contractOwner, relayAddress) notFinished(!ended) {
+        payable(contractOwner).transfer(accPot);
         ended = false;
+        betCount = 0;
+        accPot = 0;
         //uint toTransfer = accPot;
     }
     
-    function payWinner(address[] calldata winners) private onlyBy(contractOwner, relayAddress) returns (uint payedAmount) {
+    function payWinner(address[] calldata winners) public onlyBy(contractOwner, relayAddress) returns (uint payedAmount) {
 
         uint sharedPot = (accPot * 95) / 100;
         uint eachPrize = sharedPot / winners.length;
@@ -103,6 +106,7 @@ contract Forecast {//is BridgePublicAPI {
             payable(winners[i]).transfer(eachPrize);
         }
         payable(contractOwner).transfer(fees);
-        return accPot;
+        accPot = 0;
+        return sharedPot;
     }      
 }
