@@ -132,7 +132,7 @@ function initData() {
 }
 
 function printFinalPrice(finalPrice) {
-
+    $("#finalPrice").text(finalPrice);
 }
 
 
