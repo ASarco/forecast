@@ -98,6 +98,7 @@ function initContract(abi, contractAddress) {
             console.log(`SubscriptionId ${subscriptionId}`);
         })
         .on("data", function (event) {
+            console.log("Event PotIncreased");
             printAcc(event.returnValues.accPot);
             getBetCount(contract);
         })
@@ -125,6 +126,7 @@ function initContract(abi, contractAddress) {
 
 
 function initData() {
+    $("#contractLink").attr("href", `https://testnet.bscscan.com/address/${contract.options.address}`);
     getBetValue(contract);
     getSweepstakeEndTime(contract);
     getAccPot(contract);

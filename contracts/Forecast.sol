@@ -15,7 +15,7 @@ contract Forecast {//is BridgePublicAPI {
     }
 
     // the bets
-    Punter[] public bets; 
+    Punter[] public storage bets; 
     
     // number of bets
     uint8 public betCount = 0;
@@ -94,6 +94,7 @@ contract Forecast {//is BridgePublicAPI {
         ended = false;
         betCount = 0;
         accPot = 0;
+        bets.length = 0;
         //uint toTransfer = accPot;
     }
     
