@@ -2,6 +2,6 @@
 // This same configuration could be provided in the `mocha` property of your
 // project's `package.json`.
 {
-    "spec": "testsJS/**/*.test.js",
+    "spec": "test/**/*.test.js",
     "require": ["jsdom-global/register"]
 }

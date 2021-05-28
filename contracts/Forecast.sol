@@ -15,7 +15,7 @@ contract Forecast {//is BridgePublicAPI {
     }
 
     // the bets
-    Punter[] public storage bets; 
+    Punter[] public bets; 
     
     // number of bets
     uint8 public betCount = 0;
@@ -28,7 +28,7 @@ contract Forecast {//is BridgePublicAPI {
     
     // Set to true at the end, disallows any further submission.
     // By default initialized to `false`.
-    bool ended = false;
+    bool public ended = false;
     
     // Amount accumulated
     uint public accPot = 0;
@@ -83,7 +83,7 @@ contract Forecast {//is BridgePublicAPI {
         emit PotIncreased(accPot);
     } 
     
-    function sweepstakeEnd(string calldata _finalPrice) public onlyBy(contractOwner, relayAddress) notFinished(ended) {
+    function sweepstakeEnd(string memory _finalPrice) public onlyBy(contractOwner, relayAddress) notFinished(ended) {
         ended = true;
         emit Finished(_finalPrice, betCount);
         //uint toTransfer = accPot;
@@ -94,11 +94,11 @@ contract Forecast {//is BridgePublicAPI {
         ended = false;
         betCount = 0;
         accPot = 0;
-        bets.length = 0;
+        delete bets;
         //uint toTransfer = accPot;
     }
     
-    function payWinner(address[] calldata winners) public onlyBy(contractOwner, relayAddress) returns (uint payedAmount) {
+    function payWinner(address[] memory winners) public onlyBy(contractOwner, relayAddress) returns (uint payedAmount) {
 
         uint sharedPot = (accPot * 95) / 100;
         uint eachPrize = sharedPot / winners.length;
