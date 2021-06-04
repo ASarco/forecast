@@ -20,7 +20,9 @@ contract Forecast {//is BridgePublicAPI {
     // number of bets
     uint8 public betCount = 0;
     
-    // finishing time
+    // bet end time
+    uint public betEndTime;
+    // sweepstake expired
     uint public sweepstakeEndTime;
     
     //bet value
@@ -34,8 +36,9 @@ contract Forecast {//is BridgePublicAPI {
     uint public accPot = 0;
 
 
-    constructor (uint _finishingTime, uint _betValue) {
-        sweepstakeEndTime = _finishingTime;
+    constructor (uint _betEndTime, uint _hoursAfter, uint _betValue) {
+        betEndTime = _betEndTime;
+        sweepstakeEndTime = betEndTime + _hoursAfter * 1 hours;
         betValue = _betValue;
         contractOwner = msg.sender;
         //sendQuery(120); //for now
@@ -64,15 +67,12 @@ contract Forecast {//is BridgePublicAPI {
     }
 
     modifier notFinished(bool _ended) {
-        require (!_ended, "The sweepstake has finished.");
+        require (block.timestamp <= betEndTime, "The betting period has finished.");
         _;
     }
-
-    //function __callback(bytes32 _myid, string memory _result) public {
-    //    sweepstakeEnd(_result);
-    //}    
+ 
     
-    function bet(string memory _price) public payable costs(betValue) notFinished(ended) {
+    function bet(string memory _price) public payable notFinished(ended) costs(betValue) {
         
         accPot +=  betValue; //bet should always be betValue, even if sender sent more
         Punter memory newPunter;
@@ -83,22 +83,25 @@ contract Forecast {//is BridgePublicAPI {
         emit PotIncreased(accPot);
     } 
     
-    function sweepstakeEnd(string memory _finalPrice) public onlyBy(contractOwner, relayAddress) notFinished(ended) {
+/*     function sweepstakeEnd(string memory _finalPrice) public onlyBy(contractOwner, relayAddress) notFinished(ended) {
         ended = true;
         emit Finished(_finalPrice, betCount);
         //uint toTransfer = accPot;
-    }
+    } */
 
-    function sweepstakeReset() public onlyBy(contractOwner, relayAddress) notFinished(!ended) {
+    function sweepstakeReset(uint _betEndTime, uint _hoursAfter, uint _betValue) public onlyBy(contractOwner, relayAddress) {
         payable(contractOwner).transfer(accPot);
         ended = false;
         betCount = 0;
         accPot = 0;
+        betValue = _betValue;
         delete bets;
+        betEndTime = _betEndTime;
+        sweepstakeEndTime = betEndTime + _hoursAfter * 1 hours;
         //uint toTransfer = accPot;
     }
     
-    function payWinner(address[] memory winners) public onlyBy(contractOwner, relayAddress) returns (uint payedAmount) {
+    function payWinners(address[] memory winners) public onlyBy(contractOwner, relayAddress) returns (uint payedAmount) {
 
         uint sharedPot = (accPot * 95) / 100;
         uint eachPrize = sharedPot / winners.length;
