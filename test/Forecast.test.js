@@ -4,6 +4,8 @@ const { expectRevert, expectEvent, time, balance, constants } = require('@openze
 const expect = require('chai').expect;
 const assert = require('chai').assert;
 const Web3 = require('web3');
+const BN = Web3.utils.BN;
+
 
 const Forecast = contract.fromArtifact("Forecast");
 
@@ -24,31 +26,39 @@ describe("Betting", async () => {
 		let tracker0 = await balance.tracker(accounts[0], "wei");
 		await tracker0.get();
 
-		await forecast.bet("142", { from: accounts[0], value: betValue });
+		let bet = await forecast.bet("142", { from: accounts[0], value: betValue });
 		
 		assert.equal(await forecast.betCount(), '1', "Bet count should be 1");
 		assert.equal(await forecast.accPot(), betValue, `Accumulated pot should be ${betValue}`);
 		assert.approximately(parseFloat(Web3.utils.fromWei(await tracker0.delta(), "ether")), -1, 0.1, `Spend0 should be aprox 1 eth`);
 
+		expectEvent(bet, 'PotIncreased', { accPot: betValue});
+
 	})
 
 	it(`should place another bet with more money, but only should increase by ${betValue}`, async () => {
-		await forecast.bet("284", { from: accounts[1], value: betValue * 1 + 1000000 });
+		let bet = await forecast.bet("284", { from: accounts[1], value: betValue * 1 + 1000000 });
 		
 		assert.equal(await forecast.betCount(), 2, "Bet count should be 2");
 		assert.equal(await forecast.accPot(), betValue * 2, `Accumulated pot should be ${betValue * 2}`);
+
+		expectEvent(bet, 'PotIncreased');
 	})
 	
 	it(`should fail to bet because not enough money`, async () => {
 		await expectRevert(
 			forecast.bet("333", { from: accounts[0], value: betValue  * 1 - 1000000}), "Not enough funds to bet");
+
+			//expectEvent.notEmitted(bet, 'PotIncreased');
 	})
 
 	it(`should place yet another bet`, async () => {
-		await forecast.bet("666", { from: accounts[3], value: betValue * 1 + 1000000 });
+		let bet = await forecast.bet("666", { from: accounts[3], value: betValue * 1 + 1000000 });
 		
 		assert.equal(await forecast.betCount(), 3, "Bet count should be 2");
 		assert.equal(await forecast.accPot(), betValue * 3, `Accumulated pot should be ${betValue * 3}`);
+
+		expectEvent(bet, 'PotIncreased');
 	})
 });
 
@@ -68,7 +78,7 @@ describe("Pay two Winners", async () => {
 		let tracker1 = await balance.tracker(accounts[1], "wei");
 		await tracker1.get();
 		
-		let sharedPot = await forecast.payWinners([accounts[1], accounts[0]]);
+		let sharedPot = await forecast.payWinners([accounts[1], accounts[0]], "43000");
 		
 		assert.equal(parseFloat(Web3.utils.fromWei(await tracker0.delta(), "ether")), 1.425, `Balance0 should be aprox ${betValue * 3 * 0.475} }`); // can't calculate exact value due to gas
 		assert.equal(parseFloat(Web3.utils.fromWei(await tracker1.delta(), "ether")), 1.425, `Balance1 should be aprox ${betValue * 3 * 0.475} }`); // can't calculate exact value due to gas
@@ -118,10 +128,12 @@ describe("Pay single Winner", async () => {
 		let tracker2 = await balance.tracker(accounts[2], "wei");
 		await tracker2.get();
 		
-		let sharedPot = await forecast.payWinners([accounts[2]]);
+		let sharedPot = await forecast.payWinners([accounts[2]], "42000");
 		
 		assert.equal(parseFloat(Web3.utils.fromWei(await tracker2.delta(), "ether")), 0.95, `Gains2 should be aprox 0.95 eth`);
 		assert.approximately(parseFloat(Web3.utils.fromWei(await senderTracker.delta(), "ether")), 0.05, 0.01, `Fees should be aprox 5 milli`); // can't calculate exact value due to gas
+
+		expectEvent(sharedPot, 'Finished', { finalPrice: "42000", nbrWinners: "1" });
 	})
 })
 

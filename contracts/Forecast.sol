@@ -28,10 +28,6 @@ contract Forecast {//is BridgePublicAPI {
     //bet value
     uint public betValue;
     
-    // Set to true at the end, disallows any further submission.
-    // By default initialized to `false`.
-    bool public ended = false;
-    
     // Amount accumulated
     uint public accPot = 0;
 
@@ -50,7 +46,8 @@ contract Forecast {//is BridgePublicAPI {
     
     event Finished(
         string finalPrice,
-        uint8 betCount
+        uint8 nbrWinners,
+        uint sharedPot
     );
 
     modifier onlyBy(address _accountOwner, address _relayAddress) {
@@ -66,13 +63,13 @@ contract Forecast {//is BridgePublicAPI {
             payable(msg.sender).transfer(msg.value - _amount);
     }
 
-    modifier notFinished(bool _ended) {
+    modifier notFinished() {
         require (block.timestamp <= betEndTime, "The betting period has finished.");
         _;
     }
  
     
-    function bet(string memory _price) public payable notFinished(ended) costs(betValue) {
+    function bet(string memory _price) public payable notFinished() costs(betValue) {
         
         accPot +=  betValue; //bet should always be betValue, even if sender sent more
         Punter memory newPunter;
@@ -91,7 +88,6 @@ contract Forecast {//is BridgePublicAPI {
 
     function sweepstakeReset(uint _betEndTime, uint _hoursAfter, uint _betValue) public onlyBy(contractOwner, relayAddress) {
         payable(contractOwner).transfer(accPot);
-        ended = false;
         betCount = 0;
         accPot = 0;
         betValue = _betValue;
@@ -101,7 +97,7 @@ contract Forecast {//is BridgePublicAPI {
         //uint toTransfer = accPot;
     }
     
-    function payWinners(address[] memory winners) public onlyBy(contractOwner, relayAddress) returns (uint payedAmount) {
+    function payWinners(address[] memory winners, string memory finalPrice) public onlyBy(contractOwner, relayAddress) returns (uint payedAmount) {
 
         uint sharedPot = (accPot * 95) / 100;
         uint eachPrize = sharedPot / winners.length;
@@ -111,6 +107,7 @@ contract Forecast {//is BridgePublicAPI {
         }
         payable(contractOwner).transfer(fees);
         accPot = 0;
+        emit Finished(finalPrice, uint8(winners.length), sharedPot);
         return sharedPot;
     }      
 }

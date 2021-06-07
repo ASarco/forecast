@@ -1,4 +1,4 @@
-import { bet, reset, getAccPot, getBetCount, getSweepstakeEndTime, getBetValue, printAcc } from "./modules/contractFunctions.js";
+import { bet, reset, getAccPot, getBetCount, getSweepstakeEndTime, getBetValue, printAcc, printFinalPrice } from "./modules/contractFunctions.js";
 
 // Source code to interact with smart contract
 // Accounts
@@ -29,9 +29,9 @@ window.addEventListener('load', async () => {
 
     // contractAddress and abi are setted after contract 
     //var contractAddress = '0xc916b138D9A471DfD3D54A55F4C883968996D743';   //RSK
-    var contractAddress = '0x7991164cd1cDf1681C2B9127f02CD7e207Be3B91';     //BSC
+    var contractAddress = '0x5661B20C3aA744428793Ba1B1D66E1269CcBF750';     //BSC
     var abi = JSON.parse(`
-        [{"inputs":[{"internalType":"uint256","name":"_finishingTime","type":"uint256"},{"internalType":"uint256","name":"_betValue","type":"uint256"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"finalPrice","type":"string"},{"indexed":false,"internalType":"uint8","name":"betCount","type":"uint8"}],"name":"Finished","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"accPot","type":"uint256"}],"name":"PotIncreased","type":"event"},{"inputs":[],"name":"accPot","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true},{"inputs":[],"name":"betCount","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true},{"inputs":[],"name":"betValue","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"bets","outputs":[{"internalType":"address","name":"punterAddress","type":"address"},{"internalType":"string","name":"price","type":"string"}],"stateMutability":"view","type":"function","constant":true},{"inputs":[],"name":"contractOwner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true},{"inputs":[],"name":"relayAddress","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true},{"inputs":[],"name":"sweepstakeEndTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true},{"inputs":[{"internalType":"string","name":"_price","type":"string"}],"name":"bet","outputs":[],"stateMutability":"payable","type":"function","payable":true},{"inputs":[{"internalType":"string","name":"_finalPrice","type":"string"}],"name":"sweepstakeEnd","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"sweepstakeReset","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address[]","name":"winners","type":"address[]"}],"name":"payWinner","outputs":[{"internalType":"uint256","name":"payedAmount","type":"uint256"}],"stateMutability":"nonpayable","type":"function"}]
+        [{"inputs":[{"internalType":"uint256","name":"_betEndTime","type":"uint256"},{"internalType":"uint256","name":"_hoursAfter","type":"uint256"},{"internalType":"uint256","name":"_betValue","type":"uint256"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"finalPrice","type":"string"},{"indexed":false,"internalType":"uint8","name":"nbrWinners","type":"uint8"},{"indexed":false,"internalType":"uint256","name":"sharedPot","type":"uint256"}],"name":"Finished","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"accPot","type":"uint256"}],"name":"PotIncreased","type":"event"},{"inputs":[],"name":"accPot","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true},{"inputs":[],"name":"betCount","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function","constant":true},{"inputs":[],"name":"betEndTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true},{"inputs":[],"name":"betValue","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"bets","outputs":[{"internalType":"address","name":"punterAddress","type":"address"},{"internalType":"string","name":"price","type":"string"}],"stateMutability":"view","type":"function","constant":true},{"inputs":[],"name":"contractOwner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true},{"inputs":[],"name":"relayAddress","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true},{"inputs":[],"name":"sweepstakeEndTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function","constant":true},{"inputs":[{"internalType":"string","name":"_price","type":"string"}],"name":"bet","outputs":[],"stateMutability":"payable","type":"function","payable":true},{"inputs":[{"internalType":"uint256","name":"_betEndTime","type":"uint256"},{"internalType":"uint256","name":"_hoursAfter","type":"uint256"},{"internalType":"uint256","name":"_betValue","type":"uint256"}],"name":"sweepstakeReset","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address[]","name":"winners","type":"address[]"},{"internalType":"string","name":"finalPrice","type":"string"}],"name":"payWinners","outputs":[{"internalType":"uint256","name":"payedAmount","type":"uint256"}],"stateMutability":"nonpayable","type":"function"}]
     `);
 
 
@@ -95,7 +95,7 @@ function initContract(abi, contractAddress) {
         fromBlock: "earliest"
     })
         .on("connected", function (subscriptionId) {
-            console.log(`SubscriptionId ${subscriptionId}`);
+            console.log(`PotIncreased SubscriptionId: ${subscriptionId}`);
         })
         .on("data", function (event) {
             console.log("Event PotIncreased");
@@ -103,7 +103,7 @@ function initContract(abi, contractAddress) {
             getBetCount(contract);
         })
         .on("error", function (error) {
-            console.log(`Error: ${error}`);
+            console.log(`PotIncreased Error: ${error}`);
         });
 
     contract.events.Finished({
@@ -111,11 +111,10 @@ function initContract(abi, contractAddress) {
         fromBlock: "earliest"
     })
         .on("connected", function (subscriptionId) {
-            console.log(`Finished SubscriptionId ${subscriptionId}`);
+            console.log(`Finished SubscriptionId: ${subscriptionId}`);
         })
         .on("data", function (event) {
-            printFinalPrice(event.returnValues.finalPrice);
-            getBetCount(contract);
+            printFinalPrice(event.returnValues.finalPrice, event.returnValues.nbrWinners, event.returnValues.sharedPot);
         })
         .on("error", function (error) {
             console.log(`Finished Error: ${error}`);
@@ -132,13 +131,4 @@ function initData() {
     getAccPot(contract);
     getBetCount(contract);
 }
-
-function printFinalPrice(finalPrice) {
-    $("#finalPrice").text(finalPrice);
-}
-
-
-
-
-
 //module.exports = findWinners;

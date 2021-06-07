@@ -16,79 +16,97 @@
 
 <body class="container">
 
-  <div class="col align-items-end">
-    <button id="walletButton" class="btn btn-primary">Conectar a la billetera</button>
-    <div id="walletAlert" class="alert alert-warning d-none" role="alert">
-      La billetera MetaMask no esta instalada.
-    </div>
-  </div>
-
-  <div class="col align-items-start">
-
-    <h1 class="page-header">Price forecast - BSC network</h1>
+  <div class="container">
 
     <div class="row">
-      <h3 class="sub-header">Pronostica el precio de BTC</h3>
-      <form class="row mb-3" role="form">
-        <label for="newInfo" id="endTime"></label>
-        <div class="input-group col">
-          <span class="input-group-text">en USD</span>
-          <input id="newInfo" class="form-control" type="number">
+      <div class="col align-items-start">
 
-        </div>
-        <div class="col">
-          <a id="betButton" href="#" class="btn btn-primary">Pronosticar</a>
-        </div>
-      </form>
-    </div>
+        <h1 class="page-header">Price forecast - BSC network</h1>
 
-    <div class="row mb-3">
-      <h3 class="sub-header">Pronósticos totales</h3>
-      <div class="form-group">
-        <div>
-          Valor de cada pronóstico:
-          <span id="betValue" style="display: none"></span><mark id="betValueBNB"></mark> BNB, aproximadamente <mark
-            id="betValueUSD"></mark> USD
+        <div class="row">
+          <h3 class="sub-header">Pronostica el precio de BTC</h3>
+          <form class="row mb-3" role="form">
+            Cierre de pronósticos: <label for="newInfo" id="betEndTime"></label>
+            Final del contrato: <label for="newInfo" id="swpEndTime"></label>
+            <div class="input-group col">
+              <span class="input-group-text">en USD</span>
+              <input id="newInfo" class="form-control" type="number">
+
+            </div>
+            <div class="col">
+              <a id="betButton" href="#" class="btn btn-primary">Pronosticar</a>
+            </div>
+          </form>
         </div>
-        <div>
-          Pozo acumulado:
-          <span id="accPot" style="display: none;"></span><mark id="accPotBNB"></mark> BNB, aproximadamente <mark
-            id="accPotUSD"></mark> USD
+
+        <div class="row mb-3">
+          <h3 class="sub-header">Pronósticos totales</h3>
+          <div class="form-group">
+            <div>
+              Valor de cada pronóstico:
+              <span id="betValue" style="display: none"></span><mark id="betValueBNB"></mark> BNB, aproximadamente <mark
+                id="betValueUSD"></mark> USD
+            </div>
+            <div>
+              Pozo acumulado:
+              <span id="accPot" style="display: none;"></span><mark id="accPotBNB"></mark> BNB, aproximadamente <mark
+                id="accPotUSD"></mark> USD
+            </div>
+            <div>
+              Cantidad de pronósticos:
+              <span id="totalBets"></span>
+            </div>
+          </div>
         </div>
-        <div>
-          Cantidad de pronósticos:
-          <span id="totalBets"></span>
+
+
+        <div class="row">
+          <div class="col">
+            <h3>Ganador(es)</h3>
+          </div>
+        </div>
+        <div class="container">
+          <div class="row">
+            <div class="col">
+              Precio Final: <mark id="finalPrice"></mark>&nbsp;USD
+            </div>
+            <div class="col">
+              Número de ganadores: <mark id="nbrWinners"></mark>&nbsp;
+            </div>
+            <div class="col">
+              Pozo a repartir: <mark id="sharedPot"></mark>&nbsp;BNB
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            Ver el contrato en <a id="contractLink" href="" target="_blank">BSC Scan</a>
+          </div>
+        </div>
+
+        <hr />
+
+        <div class="row mb-3">
+          <div>
+            <small>Cotización obtenida del precio spot de la API de Binance, a la fecha y hora establecida como final
+              del
+              contrato.</small></br>
+            <small>Debido a la volatilidad de los mercados, y a la latencia en las redes, el precio final puede no ser
+              exáctamente el ocurrido en el segundo final.</small>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="col align-items-end">
+        <button id="walletButton" class="btn btn-primary">Conectar a la billetera</button>
+        <div id="walletAlert" class="alert alert-warning d-none" role="alert">
+          La billetera MetaMask no esta instalada.
         </div>
       </div>
+    
     </div>
-
-    <div class="row mb-3">
-      <h3 class="sub-header">Finalizar</h3>
-      <label for="finalPrice">Precio final</label>
-      <div class="input-group col">
-        <span id="finalPrice"></span>
-        <span class="input-group-text">en USD</span>
-      </div>
-      <div class="col">
-        <a id="resetButton" href="#" class="btn btn-primary">Reset</a>
-      </div>
-    </div>
-
-
-    <div class="row mb-3">
-      <div class="col">
-        <h3>Ganador(es)</h3>
-      </div>
-      <div id="winnerList" />
-    </div>
-
-  <div class="row mb-3">
-    <div>
-      Ver el contrato en <a id="contractLink" href="">BSC Scan</a>  
-    </div>
-  </div>
-
-  </div>
 
 </body>
 

@@ -17,10 +17,15 @@ function reset(contract, account) {
 }
 
 function getSweepstakeEndTime(contract) {
+    contract.methods.betEndTime().call().then(function (endTime) {
+        console.log(`end: ${endTime}`);
+        var date = new Date(endTime * 1000);
+        $('#betEndTime').text(date.toString());
+    })
     contract.methods.sweepstakeEndTime().call().then(function (endTime) {
         console.log(`end: ${endTime}`);
         var date = new Date(endTime * 1000);
-        $('#endTime').text(date.toString());
+        $('#swpEndTime').text(date.toString());
     })
 }
 
@@ -62,5 +67,12 @@ function getPriceAPI() {
 }
 
 
+function printFinalPrice(finalPrice, nbrWinners, sharedPot) {
+    $("#finalPrice").text(finalPrice);
+    $("#nbrWinners").text(nbrWinners);
+    $("#sharedPot").text(web3.utils.fromWei(sharedPot));
+}
 
-export { bet, reset, getAccPot, getBetCount, getSweepstakeEndTime, getBetValue, printAcc };
+
+
+export { bet, reset, getAccPot, getBetCount, getSweepstakeEndTime, getBetValue, printAcc, printFinalPrice};
